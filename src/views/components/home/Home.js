@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Col, Container, Row, Table, InputGroup, InputGroupAddon, Input, Form, FormGroup, Label, FormFeedback, FormText } from 'reactstrap';
-import ReactTooltip from 'react-tooltip';
+import { Button, Col, Container, Row, Table, Input, Form, FormGroup, Label, FormFeedback, FormText } from 'reactstrap';
 import './home.sass';
 import Blockchain from './blockchain/Blockchain';
 import Transaction from './blockchain/Transaction';

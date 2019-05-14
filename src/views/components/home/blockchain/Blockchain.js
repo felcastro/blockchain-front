@@ -18,11 +18,10 @@ class Blockchain{
     }
 
     mineBlock(rewardAddress){
-        let block = new Block(new Date(), this.pendingTransactions, this.getLatestBlock().hash);
+        this.pendingTransactions.push(new Transaction("Sistema de Recompensas", rewardAddress, this.miningReward));
+        let block = new Block(new Date(), this.pendingTransactions, this.getLatestBlock().hash, rewardAddress);
         block.mineBlock(this.difficulty);
         this.chain.push(block);
-
-        this.pendingTransactions = [ new Transaction(null, rewardAddress, this.miningReward) ];
     }
 
     addTransaction(transaction){
