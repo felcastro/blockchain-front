@@ -11,7 +11,7 @@ class Footer extends Component {
     render() {
         return (
             <div className="footer-area text-center bg-dark">
-                <span> {this.state.date} Blockchain </span>
+                <span> {this.state.date} Blockchain - Based on <a href="https://www.youtube.com/channel/UCnxrdFPXJMeHru_b4Q_vTPQ" target="_blank">Simply Explained - Savjee</a> videos.</span>
             </div>
         );
     }

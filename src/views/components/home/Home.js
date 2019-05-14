@@ -3,6 +3,7 @@ import { Button, Col, Container, Row, Table, InputGroup, InputGroupAddon, Input,
 import ReactTooltip from 'react-tooltip';
 import './home.sass';
 import Blockchain from './blockchain/Blockchain';
+import Transaction from './blockchain/Transaction';
 
 class Home extends Component {
 
@@ -16,7 +17,7 @@ class Home extends Component {
             inputAmount: 0,
             inputSender: '',
             inputReceiver: '',
-            transactions: []
+            inputReward: bc.miningReward
         };
     }
 
@@ -28,17 +29,16 @@ class Home extends Component {
     }
 
     mineBlock = () => {
-        this.state.blockchain.mineBlock(this.state.transactions);
+        this.state.blockchain.mineBlock("lol");
         this.setState({
-            blockchain: this.state.blockchain,
-            transactions: []
+            blockchain: this.state.blockchain
         });
     }
     
     changeDifficulty = (e) => {
         e.preventDefault();
         if (this.state.inputDifficulty > 0 && this.state.inputDifficulty <= 5) {
-            let blockchain = this.state.blockchain
+            let blockchain = this.state.blockchain;
             blockchain.difficulty = parseInt(this.state.inputDifficulty);
             this.setState({blockchain});
         }
@@ -54,13 +54,15 @@ class Home extends Component {
 
     addTransaction = (e) => {
         e.preventDefault();
-        let transactions = this.state.transactions.slice();
-        transactions.push({
-            sender: this.state.inputSender,
-            receiver: this.state.inputReceiver,
-            amount: this.state.inputAmount
-        });
-        this.setState({transactions});
+        this.state.blockchain.addTransaction( new Transaction(this.state.inputSender, this.state.inputReceiver, this.state.inputAmount) );
+        this.setState({blockchain: this.state.blockchain});
+    }
+    
+    changeReward = (e) => {
+        e.preventDefault();
+        let blockchain = this.state.blockchain;
+        blockchain.miningReward = this.state.inputReward;
+        this.setState({blockchain});
     }
 
     render() {
@@ -114,10 +116,10 @@ class Home extends Component {
                                     </thead>
                                     <tbody>
                                         {
-                                        this.state.transactions.map((item, index) => {
+                                        this.state.blockchain.pendingTransactions.map((item, index) => {
                                             return <tr key={index}>
-                                                <td>{item.sender}</td>
-                                                <td>{item.receiver}</td>
+                                                <td>{item.fromAddress}</td>
+                                                <td>{item.toAddress}</td>
                                                 <td>{item.amount}</td>
                                             </tr>
                                         })
@@ -141,6 +143,19 @@ class Home extends Component {
                                                 <Button color="primary" type="submit">Atualizar</Button>
                                             </Form>
                                         </div>
+                                        <div className="pb-2 mb-2 border-bottom">
+                                            <Form onSubmit={(e) => this.changeReward(e)}>
+                                                <FormGroup>
+                                                    <Label for="reward">Prêmio</Label>
+                                                    <Input min={0} type="number" step="1" required
+                                                    onChange={(e) => this.setState({inputReward: e.target.value})}  
+                                                    value={this.state.inputReward}/>
+                                                    <FormFeedback>Valor Inválido</FormFeedback>
+                                                    <FormText>Prêmio concedido a quem minerar um bloco.</FormText>
+                                                </FormGroup>
+                                                <Button color="primary" type="submit">Atualizar</Button>
+                                            </Form>
+                                        </div>
                                     </Col>
                                     <Col xs="6" md="4">
                                         <Button color="primary" onClick={() => this.newBlockchain()}>Resetar</Button>
@@ -158,10 +173,10 @@ class Home extends Component {
                             <div className="bc-area mb-3 p-3">
                                 <Row>
                                 { 
-                                this.state.blockchain.chain.map((item) => {
-                                    return <Col  xs="4" md="2" lg="1" key={item.index}>
-                                        <div className={"py-3 mb-3 text-center " + (item.index === this.state.currentBlock ? 'bc-block-selected' : 'bc-block')} onClick={() => this.setState({currentBlock: item.index})}>
-                                            <span className="text-white">{item.index}</span>
+                                this.state.blockchain.chain.map((item, index) => {
+                                    return <Col  xs="4" md="2" lg="1" key={index}>
+                                        <div className={"py-3 mb-3 text-center " + (index === this.state.currentBlock ? 'bc-block-selected' : 'bc-block')} onClick={() => this.setState({currentBlock: index})}>
+                                            <span className="text-white">{index}</span>
                                         </div>
                                     </Col>
                                 })
@@ -174,16 +189,12 @@ class Home extends Component {
                                 <Table>
                                     <tbody>
                                     <tr>
-                                        <td>Index</td>
-                                        <td>{this.state.blockchain.chain[this.state.currentBlock].index}</td>
-                                    </tr>
-                                    <tr>
                                         <td>Timestamp</td>
                                         <td>{this.state.blockchain.chain[this.state.currentBlock].timestamp.toString()}</td>
                                     </tr>
                                     <tr>
                                         <td>Data</td>  
-                                        <td>{JSON.stringify(this.state.blockchain.chain[this.state.currentBlock].data)}</td>
+                                        <td>{JSON.stringify(this.state.blockchain.chain[this.state.currentBlock].transactions)}</td>
                                     </tr>
                                     <tr>
                                         <td>Previous Hash</td>

@@ -1,23 +1,49 @@
 import Block from './Block';
+import Transaction from './Transaction';
 
 class Blockchain{
     constructor(difficulty){
         this.chain = [this.createGenesisBlock()];
         this.difficulty = difficulty;
+        this.pendingTransactions = [];
+        this.miningReward = 100;
     }
 
     createGenesisBlock(){
-        return new Block(0, new Date(0), {}, "0");
+        return new Block(new Date(0), {}, "0");
     }
 
     getLatestBlock(){
         return this.chain[this.chain.length - 1];
     }
 
-    mineBlock(data){
-        let block = new Block(this.chain.length, new Date(), data, this.getLatestBlock().hash);
+    mineBlock(rewardAddress){
+        let block = new Block(new Date(), this.pendingTransactions, this.getLatestBlock().hash);
         block.mineBlock(this.difficulty);
         this.chain.push(block);
+
+        this.pendingTransactions = [ new Transaction(null, rewardAddress, this.miningReward) ];
+    }
+
+    addTransaction(transaction){
+        this.pendingTransactions.push(transaction);
+    }
+
+    getBalanceOfAddress(address){
+        let balance = 0;
+
+        for(const block of this.chain){
+            for(const trans of block.transactions){
+                if(trans.fromAddress === address){
+                    balance -= trans.amount;
+                }
+                if(trans.toAddress === address){
+                    balance += trans.amount;
+                }
+            }
+        }
+
+        return balance;
     }
 
     isChainValid(){
